@@ -3,125 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheckBrabant – Speelse Kaart</title>
+<title>CheckBrabant – Trello-Style Uitjes</title>
 
-<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
 <style>
-html, body { height:100%; margin:0; font-family: system-ui, sans-serif; }
+body { font-family: system-ui, sans-serif; margin:0; padding:0; background:#f0f4f8; }
 header {
-  padding:1.5rem;
-  background: linear-gradient(135deg,#2f855a,#68d391);
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:1rem;
-  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  padding:1rem; background:linear-gradient(135deg,#2f855a,#68d391); color:white; text-align:center;
 }
-header img { height:40px; }
-h1 { margin:0; font-size:2rem; }
-p { margin:0; font-size:1rem; }
+header h1 { margin:0; }
 
-#map { height: calc(100vh - 80px); width:100%; }
-
-.marker {
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  cursor:pointer;
-  border:2px solid white;
-  font-size:24px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.board { display:flex; gap:1rem; padding:1rem; overflow-x:auto; }
+.column {
+  background:#ffffff; border-radius:8px; padding:1rem; width:300px; flex-shrink:0; display:flex; flex-direction:column;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
 }
-.pulse { animation: pulse 2s infinite; box-shadow: 0 0 0 0 rgba(255,0,0,0.7); }
-.bounce { animation: bounce 1s infinite; }
-@keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(255,0,0,0.7);} 70% { box-shadow:0 0 0 15px rgba(255,0,0,0);} 100% { box-shadow:0 0 0 0 rgba(255,0,0,0);} }
-@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
-.marker:hover { transform: scale(1.2); transition: transform 0.2s; }
-
-.popup-image { width:100%; border-radius:8px; margin-bottom:5px; }
-.badges { font-size:0.9rem; margin-top:4px; }
-.mapboxgl-popup-content { animation: popupFade 0.3s ease-out; }
-@keyframes popupFade { 0% {opacity:0; transform: translateY(10px);} 100% {opacity:1; transform: translateY(0);} }
+.column h2 { margin-top:0; margin-bottom:1rem; text-align:center; color:#2f855a; }
+.card {
+  background:#e6fffa; padding:1rem; margin-bottom:0.8rem; border-radius:6px; cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,0.1); transition: transform 0.2s;
+}
+.card:hover { transform:scale(1.02); }
+.card img { width:100%; border-radius:4px; margin-bottom:5px; }
+.badges { font-size:0.8rem; margin-top:4px; color:#2d3748; }
 </style>
 </head>
 <body>
 
 <header>
-  <img src="https://via.placeholder.com/40x40?text=CB" alt="CheckBrabant Logo">
-  <div>
-    <h1>CheckBrabant</h1>
-    <p>Interactieve speelse kaart – klik op uitjes voor visuals</p>
-  </div>
+  <h1>CheckBrabant – Jouw Uitjes Board</h1>
 </header>
 
-<div id="map"></div>
+<div class="board">
+  <div class="column" id="open">
+    <h2>Open</h2>
+  </div>
+  <div class="column" id="todo">
+    <h2>To-Do</h2>
+  </div>
+  <div class="column" id="check">
+    <h2>Check</h2>
+  </div>
+</div>
 
-<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <script>
-// Init MapLibre
-const map = new maplibregl.Map({
-    container: 'map',
-    style: {version:8,sources:{},layers:[]},
-    center: [5.2, 51.5], // Midden Brabant
-    zoom: 9
-});
-
-// Focus alleen op Brabant
-map.setMaxBounds([
-  [4.7, 50.9], // Zuidwest
-  [6.0, 51.9]  // Noordoost
-]);
-
-// Voeg Carto Light tiles toe
-map.on('load', () => {
-  map.addSource('carto-light', {
-    type: 'raster',
-    tiles: ['https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'],
-    tileSize: 256
-  });
-  map.addLayer({
-    id: 'carto-light-layer',
-    type: 'raster',
-    source: 'carto-light'
-  });
-});
-
-// Uitjes data
+// Voorbeeld uitjes data
 const uitjes = [
-  {name:"Efteling", coords:[5.040,51.650], badges:["🎢 Pretpark","🌳 Natuur"], visited:true, emoji:"🎢", img:"https://via.placeholder.com/250x150?text=Efteling"},
-  {name:"Safaripark Beekse Bergen", coords:[5.098,51.560], badges:["🌿 Natuur","👨‍👩‍👧‍👦 Kinderen"], visited:false, emoji:"🦁", img:"https://via.placeholder.com/250x150?text=Safaripark"},
-  {name:"Biesbosch", coords:[4.850,51.750], badges:["🌳 Natuur","🚣 Outdoor"], visited:true, emoji:"🌳", img:"https://via.placeholder.com/250x150?text=Biesbosch"},
-  {name:"Stedelijk Museum Breda", coords:[4.775,51.592], badges:["🏛️ Cultuur","👨‍👩‍👧‍👦 Kinderen"], visited:false, emoji:"🏛️", img:"https://via.placeholder.com/250x150?text=Museum"},
-  {name:"Ouwehands Dierenpark", coords:[5.582,51.984], badges:["🦁 Dieren","👨‍👩‍👧‍👦 Kinderen"], visited:true, emoji:"🦁", img:"https://via.placeholder.com/250x150?text=Dierenpark"}
+  {name:"Efteling", badges:["🎢 Pretpark","🌳 Natuur"], img:"https://via.placeholder.com/250x150?text=Efteling", status:"open"},
+  {name:"Safaripark Beekse Bergen", badges:["🌿 Natuur","👨‍👩‍👧‍👦 Kinderen"], img:"https://via.placeholder.com/250x150?text=Safaripark", status:"todo"},
+  {name:"Biesbosch", badges:["🌳 Natuur","🚣 Outdoor"], img:"https://via.placeholder.com/250x150?text=Biesbosch", status:"check"},
+  {name:"Stedelijk Museum Breda", badges:["🏛️ Cultuur","👨‍👩‍👧‍👦 Kinderen"], img:"https://via.placeholder.com/250x150?text=Museum", status:"open"},
+  {name:"Ouwehands Dierenpark", badges:["🦁 Dieren","👨‍👩‍👧‍👦 Kinderen"], img:"https://via.placeholder.com/250x150?text=Dierenpark", status:"todo"}
 ];
 
-// Voeg markers toe
+// Functie om een card te maken
+function createCard(u){
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<img src="${u.img}" alt="${u.name}"><b>${u.name}</b><div class="badges">${u.badges.join(" · ")}</div>`;
+  return card;
+}
+
+// Voeg kaarten toe aan kolommen
 uitjes.forEach(u => {
-    const el = document.createElement('div');
-    el.className = 'marker';
-    el.textContent = u.emoji;
-    el.style.backgroundColor = u.visited ? '#00ff00' : '#ff6600';
-    if(!u.visited) el.classList.add('pulse','bounce');
+  const col = document.getElementById(u.status);
+  col.appendChild(createCard(u));
+});
 
-    const popup = new maplibregl.Popup({ offset:25 }).setHTML(
-        `<img src="${u.img}" class="popup-image">
-         <b>${u.name}</b><br/><div class="badges">${u.badges.join(" · ")}</div>`
-    );
-
-    new maplibregl.Marker(el)
-        .setLngLat(u.coords)
-        .setPopup(popup)
-        .addTo(map);
-
-    el.addEventListener('click', () => {
-        u.visited = !u.visited;
-        el.style.backgroundColor = u.visited ? '#00ff00' : '#ff6600';
-        if(u.visited) el.classList.remove('pulse','bounce');
-        else el.classList.add('pulse','bounce');
-    });
+// Maak kolommen drag & drop
+['open','todo','check'].forEach(id=>{
+  new Sortable(document.getElementById(id), {
+    group: 'board', // kan tussen kolommen droppen
+    animation: 150,
+    ghostClass: 'dragging'
+  });
 });
 </script>
 
