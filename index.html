@@ -37,29 +37,33 @@
  integrity="sha256-o9N1j7gF3cNQyT7Qk+f7aFZx5b6GIKCprh8m6cTIKM4=" crossorigin=""></script>
 
 <script>
-// Init kaart
-var map = L.map('map').setView([51.5, 5.2], 9); // Midden Noord-Brabant
+document.addEventListener("DOMContentLoaded", function() {
 
-// Tile layer
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+  // Init kaart
+  var map = L.map('map').setView([51.5, 5.2], 9); // Midden Noord-Brabant
 
-// Testuitjes
-var uitjes = [
-  {name:"Efteling", lat:51.650, lng:5.040, badges:["🎢 Pretpark","🌳 Natuur"]},
-  {name:"Safaripark Beekse Bergen", lat:51.560, lng:5.098, badges:["🌿 Natuur","👨‍👩‍👧‍👦 Kinderen"]},
-  {name:"Biesbosch", lat:51.750, lng:4.850, badges:["🌳 Natuur","🚣 Outdoor"]},
-  {name:"Stedelijk Museum Breda", lat:51.592, lng:4.775, badges:["🏛️ Cultuur","👨‍👩‍👧‍👦 Kinderen"]},
-  {name:"Ouwehands Dierenpark", lat:51.984, lng:5.582, badges:["🦁 Dieren","👨‍👩‍👧‍👦 Kinderen"]}
-];
+  // Tile layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
 
-// Voeg markers toe
-uitjes.forEach(function(u){
-  var popupContent = "<strong>"+u.name+"</strong><br/>" + u.badges.join(" · ");
-  L.marker([u.lat, u.lng]).addTo(map)
-    .bindPopup(popupContent)
-    .on('click', function(){ alert("Klik op "+u.name+" voor detailpagina"); });
+  // Testuitjes
+  var uitjes = [
+    {name:"Efteling", lat:51.650, lng:5.040, badges:["🎢 Pretpark","🌳 Natuur"]},
+    {name:"Safaripark Beekse Bergen", lat:51.560, lng:5.098, badges:["🌿 Natuur","👨‍👩‍👧‍👦 Kinderen"]},
+    {name:"Biesbosch", lat:51.750, lng:4.850, badges:["🌳 Natuur","🚣 Outdoor"]},
+    {name:"Stedelijk Museum Breda", lat:51.592, lng:4.775, badges:["🏛️ Cultuur","👨‍👩‍👧‍👦 Kinderen"]},
+    {name:"Ouwehands Dierenpark", lat:51.984, lng:5.582, badges:["🦁 Dieren","👨‍👩‍👧‍👦 Kinderen"]}
+  ];
+
+  // Voeg markers toe
+  uitjes.forEach(function(u){
+    var popupContent = "<strong>"+u.name+"</strong><br/>" + u.badges.join(" · ");
+    L.marker([u.lat, u.lng]).addTo(map)
+      .bindPopup(popupContent)
+      .on('click', function(){ alert("Klik op "+u.name+" voor detailpagina"); });
+  });
+
 });
 </script>
 
