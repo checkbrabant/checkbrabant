@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheckBrabant – Speelse Mapbox Kaart</title>
+<title>CheckBrabant – MapLibre Speelse Kaart</title>
 
-<!-- Mapbox GL JS CSS -->
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.16.0/mapbox-gl.css" rel="stylesheet" />
+<!-- MapLibre GL JS CSS -->
+<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
 <style>
 html, body { height:100%; margin:0; font-family: system-ui, sans-serif; }
+
 header {
   padding:1.5rem;
   background: linear-gradient(135deg,#2f855a,#68d391);
@@ -61,15 +62,13 @@ p { margin:0; font-size:1rem; }
 
 <div id="map"></div>
 
-<!-- Mapbox GL JS -->
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.16.0/mapbox-gl.js"></script>
+<!-- MapLibre GL JS -->
+<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script>
-const mapboxToken = 'YOUR_MAPBOX_ACCESS_TOKEN_HIER'; // Zet hier je token
-
-mapboxgl.accessToken = mapboxToken;
-const map = new mapboxgl.Map({
+// Init MapLibre
+const map = new maplibregl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/light-v11', // lichte, speelse stijl
+    style: 'https://demotiles.maplibre.org/style.json', // gratis speelse stijl
     center: [5.2, 51.5],
     zoom: 9
 });
@@ -90,12 +89,12 @@ uitjes.forEach(u => {
   el.style.backgroundColor = u.visited ? '#00ff00' : '#ff0000';
   if(!u.visited) el.classList.add('pulse'); // pulserende animatie
 
-  const popup = new mapboxgl.Popup({ offset:25 }).setHTML(
+  const popup = new maplibregl.Popup({ offset:25 }).setHTML(
     `<img src="${u.img}" class="popup-image">
      <b>${u.name}</b><br/><div class="badges">${u.badges.join(" · ")}</div>`
   );
 
-  const marker = new mapboxgl.Marker(el)
+  const marker = new maplibregl.Marker(el)
     .setLngLat(u.coords)
     .setPopup(popup)
     .addTo(map);
