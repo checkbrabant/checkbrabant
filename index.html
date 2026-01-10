@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheckBrabant – Speelse Kaart</title>
+<title>CheckBrabant – Digitale Speelse Kaart</title>
 
 <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
 <style>
 html, body { height:100%; margin:0; font-family: system-ui, sans-serif; }
-
 header {
   padding:1.5rem;
   background: linear-gradient(135deg,#2f855a,#68d391);
@@ -25,6 +24,7 @@ p { margin:0; font-size:1rem; }
 
 #map { height: calc(100vh - 80px); width:100%; }
 
+/* Marker styling */
 .marker {
   width:40px;
   height:40px;
@@ -36,43 +36,18 @@ p { margin:0; font-size:1rem; }
   align-items:center;
   justify-content:center;
 }
-.pulse {
-  animation: pulse 2s infinite;
-  box-shadow: 0 0 0 0 rgba(255,0,0,0.7);
-}
-.bounce {
-  animation: bounce 1s infinite;
-}
-@keyframes pulse {
-  0% { box-shadow:0 0 0 0 rgba(255,0,0,0.7); }
-  70% { box-shadow:0 0 0 15px rgba(255,0,0,0); }
-  100% { box-shadow:0 0 0 0 rgba(255,0,0,0); }
-}
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
+.pulse { animation: pulse 2s infinite; box-shadow: 0 0 0 0 rgba(255,0,0,0.7); }
+.bounce { animation: bounce 1s infinite; }
+@keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(255,0,0,0.7);} 70% { box-shadow:0 0 0 15px rgba(255,0,0,0);} 100% { box-shadow:0 0 0 0 rgba(255,0,0,0);} }
+@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+.marker:hover { transform: scale(1.2); transition: transform 0.2s; }
 
-.marker:hover {
-  transform: scale(1.2);
-  transition: transform 0.2s;
-}
-
-.popup-image {
-  width:100%;
-  border-radius:8px;
-  margin-bottom:5px;
-}
+.popup-image { width:100%; border-radius:8px; margin-bottom:5px; }
 .badges { font-size:0.9rem; margin-top:4px; }
 
 /* Popup fade-in */
-.mapboxgl-popup-content {
-  animation: popupFade 0.3s ease-out;
-}
-@keyframes popupFade {
-  0% { opacity:0; transform: translateY(10px); }
-  100% { opacity:1; transform: translateY(0); }
-}
+.mapboxgl-popup-content { animation: popupFade 0.3s ease-out; }
+@keyframes popupFade { 0% {opacity:0; transform: translateY(10px);} 100% {opacity:1; transform: translateY(0);} }
 </style>
 </head>
 <body>
@@ -89,27 +64,33 @@ p { margin:0; font-size:1rem; }
 
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script>
+// Init MapLibre
 const map = new maplibregl.Map({
     container: 'map',
-    style: {version:8,sources:{},layers:[]},
+    style: {
+        "version": 8,
+        "sources": {},
+        "layers": [],
+        "glyphs": "https://demotiles.maplibre.org/fonts/{fontstack}/{range}.pbf"
+    },
     center: [5.2, 51.5],
     zoom: 9
 });
 
-// Voeg raster OSM tiles toe als achtergrond
+// Voeg digitale minimalistische achtergrond toe
 map.on('load', () => {
-  map.addSource('osm-tiles', {
-    type: 'raster',
-    tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-    tileSize: 256
-  });
-  map.addLayer({
-    id: 'osm-tiles-layer',
-    type: 'raster',
-    source: 'osm-tiles',
-    minzoom:0,
-    maxzoom:19
-  });
+    // Lichtgroen land
+    map.addLayer({
+        id: 'land',
+        type: 'background',
+        paint: { 'background-color': '#c8f7c5' }
+    });
+    // Blauwe wateren
+    map.addLayer({
+        id: 'water',
+        type: 'background',
+        paint: { 'background-color': '#a0dfff' }
+    });
 });
 
 // Uitjes data
@@ -123,28 +104,28 @@ const uitjes = [
 
 // Voeg markers toe
 uitjes.forEach(u => {
-  const el = document.createElement('div');
-  el.className = 'marker';
-  el.textContent = u.emoji;
-  el.style.backgroundColor = u.visited ? '#00ff00' : '#ff6600';
-  if(!u.visited) el.classList.add('pulse','bounce');
-
-  const popup = new maplibregl.Popup({ offset:25 }).setHTML(
-    `<img src="${u.img}" class="popup-image">
-     <b>${u.name}</b><br/><div class="badges">${u.badges.join(" · ")}</div>`
-  );
-
-  const marker = new maplibregl.Marker(el)
-    .setLngLat(u.coords)
-    .setPopup(popup)
-    .addTo(map);
-
-  el.addEventListener('click', () => {
-    u.visited = !u.visited;
+    const el = document.createElement('div');
+    el.className = 'marker';
+    el.textContent = u.emoji;
     el.style.backgroundColor = u.visited ? '#00ff00' : '#ff6600';
-    if(u.visited) el.classList.remove('pulse','bounce');
-    else el.classList.add('pulse','bounce');
-  });
+    if(!u.visited) el.classList.add('pulse','bounce');
+
+    const popup = new maplibregl.Popup({ offset:25 }).setHTML(
+        `<img src="${u.img}" class="popup-image">
+         <b>${u.name}</b><br/><div class="badges">${u.badges.join(" · ")}</div>`
+    );
+
+    new maplibregl.Marker(el)
+        .setLngLat(u.coords)
+        .setPopup(popup)
+        .addTo(map);
+
+    el.addEventListener('click', () => {
+        u.visited = !u.visited;
+        el.style.backgroundColor = u.visited ? '#00ff00' : '#ff6600';
+        if(u.visited) el.classList.remove('pulse','bounce');
+        else el.classList.add('pulse','bounce');
+    });
 });
 </script>
 
