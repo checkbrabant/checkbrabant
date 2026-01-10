@@ -1,20 +1,30 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CheckBrabant – Interactieve Kaart</title>
+
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
  integrity="sha256-sA+o1jS4h2bJ9xQSP+Dy2s7w5xoDibpVf5Np8p+F+Gc=" crossorigin=""/>
+
 <style>
-  body { margin:0; font-family: system-ui, sans-serif; }
-  header { padding: 1.5rem; background: linear-gradient(135deg,#2f855a,#68d391); color: white; text-align:center;}
-  h1 { margin:0; font-size:2rem; }
-  #map { height: 80vh; width: 100%; }
+  html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
+  header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg,#2f855a,#68d391);
+    color: white;
+    text-align: center;
+  }
+  h1 { margin: 0; font-size: 2rem; }
+  p { margin-top: 0.5rem; }
+
+  #map { height: calc(100vh - 120px); width: 100%; } /* header ±120px */
 </style>
 </head>
-<body>
 
+<body>
 <header>
   <h1>CheckBrabant</h1>
   <p>Interactieve testkaart met een paar uitjes</p>
@@ -22,15 +32,17 @@
 
 <div id="map"></div>
 
+<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
  integrity="sha256-o9N1j7gF3cNQyT7Qk+f7aFZx5b6GIKCprh8m6cTIKM4=" crossorigin=""></script>
+
 <script>
 // Init kaart
 var map = L.map('map').setView([51.5, 5.2], 9); // Midden Noord-Brabant
 
 // Tile layer
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
 // Testuitjes
