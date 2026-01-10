@@ -24,7 +24,6 @@ p { margin:0; font-size:1rem; }
 
 #map { height: calc(100vh - 80px); width:100%; }
 
-/* Marker styling */
 .marker {
   width:40px;
   height:40px;
@@ -44,8 +43,6 @@ p { margin:0; font-size:1rem; }
 
 .popup-image { width:100%; border-radius:8px; margin-bottom:5px; }
 .badges { font-size:0.9rem; margin-top:4px; }
-
-/* Popup fade-in */
 .mapboxgl-popup-content { animation: popupFade 0.3s ease-out; }
 @keyframes popupFade { 0% {opacity:0; transform: translateY(10px);} 100% {opacity:1; transform: translateY(0);} }
 </style>
@@ -64,33 +61,25 @@ p { margin:0; font-size:1rem; }
 
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script>
-// Init MapLibre
 const map = new maplibregl.Map({
     container: 'map',
-    style: {
-        "version": 8,
-        "sources": {},
-        "layers": [],
-        "glyphs": "https://demotiles.maplibre.org/fonts/{fontstack}/{range}.pbf"
-    },
+    style: {version:8,sources:{},layers:[]},
     center: [5.2, 51.5],
     zoom: 9
 });
 
-// Voeg digitale minimalistische achtergrond toe
+// Voeg Stamen Watercolor tiles toe als speelse achtergrond
 map.on('load', () => {
-    // Lichtgroen land
-    map.addLayer({
-        id: 'land',
-        type: 'background',
-        paint: { 'background-color': '#c8f7c5' }
-    });
-    // Blauwe wateren
-    map.addLayer({
-        id: 'water',
-        type: 'background',
-        paint: { 'background-color': '#a0dfff' }
-    });
+  map.addSource('stamen-watercolor', {
+    type: 'raster',
+    tiles: ['https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg'],
+    tileSize: 256
+  });
+  map.addLayer({
+    id: 'base-map',
+    type: 'raster',
+    source: 'stamen-watercolor'
+  });
 });
 
 // Uitjes data
