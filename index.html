@@ -3,14 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheckBrabant – Interactieve Kaart</title>
+<title>CheckBrabant – Speelse Mapbox Kaart</title>
 
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
+<!-- Mapbox GL JS CSS -->
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.16.0/mapbox-gl.css" rel="stylesheet" />
 <style>
 html, body { height:100%; margin:0; font-family: system-ui, sans-serif; }
-
 header {
   padding:1.5rem;
   background: linear-gradient(135deg,#2f855a,#68d391);
@@ -25,15 +23,24 @@ header img { height:40px; }
 h1 { margin:0; font-size:2rem; }
 p { margin:0; font-size:1rem; }
 
-#map { height: calc(100vh - 80px); width:100%; border-top-left-radius:12px; border-top-right-radius:12px; overflow:hidden; }
+#map { height: calc(100vh - 80px); width:100%; }
 
-.leaflet-popup-content-wrapper {
-  border-radius:12px;
-  background:#fffbe6;
-  box-shadow:0 2px 8px rgba(0,0,0,0.2);
-  max-width:250px;
+.marker {
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  cursor:pointer;
+  border:2px solid white;
 }
-.leaflet-popup-content b { color:#2f855a; }
+.pulse {
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 0 0 rgba(255,0,0,0.7);
+}
+@keyframes pulse {
+  0% { box-shadow:0 0 0 0 rgba(255,0,0,0.7); }
+  70% { box-shadow:0 0 0 15px rgba(255,0,0,0); }
+  100% { box-shadow:0 0 0 0 rgba(255,0,0,0); }
+}
 .popup-image {
   width:100%;
   border-radius:8px;
@@ -42,8 +49,8 @@ p { margin:0; font-size:1rem; }
 .badges { font-size:0.9rem; margin-top:4px; }
 </style>
 </head>
-
 <body>
+
 <header>
   <img src="https://via.placeholder.com/40x40?text=CB" alt="CheckBrabant Logo">
   <div>
@@ -54,49 +61,53 @@ p { margin:0; font-size:1rem; }
 
 <div id="map"></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Mapbox GL JS -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.16.0/mapbox-gl.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+const mapboxToken = 'YOUR_MAPBOX_ACCESS_TOKEN_HIER'; // Zet hier je token
 
-  // Init map
-  var map = L.map('map').setView([51.5,5.2],9);
+mapboxgl.accessToken = mapboxToken;
+const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v11', // lichte, speelse stijl
+    center: [5.2, 51.5],
+    zoom: 9
+});
 
-  // Betrouwbare Carto Positron tiles
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution:'© OpenStreetMap contributors © CARTO',
-    subdomains:'abcd',
-    maxZoom:19
-  }).addTo(map);
+// Uitjes data
+const uitjes = [
+  {name:"Efteling", coords:[5.040,51.650], badges:["🎢 Pretpark","🌳 Natuur"], visited:true, img:"https://via.placeholder.com/250x150?text=Efteling"},
+  {name:"Safaripark Beekse Bergen", coords:[5.098,51.560], badges:["🌿 Natuur","👨‍👩‍👧‍👦 Kinderen"], visited:false, img:"https://via.placeholder.com/250x150?text=Safaripark"},
+  {name:"Biesbosch", coords:[4.850,51.750], badges:["🌳 Natuur","🚣 Outdoor"], visited:true, img:"https://via.placeholder.com/250x150?text=Biesbosch"},
+  {name:"Stedelijk Museum Breda", coords:[4.775,51.592], badges:["🏛️ Cultuur","👨‍👩‍👧‍👦 Kinderen"], visited:false, img:"https://via.placeholder.com/250x150?text=Museum"},
+  {name:"Ouwehands Dierenpark", coords:[5.582,51.984], badges:["🦁 Dieren","👨‍👩‍👧‍👦 Kinderen"], visited:true, img:"https://via.placeholder.com/250x150?text=Dierenpark"}
+];
 
-  // Marker icons (groen vinkje / rode vlag)
-  var visitedIcon = L.icon({iconUrl:'https://via.placeholder.com/30/00ff00/ffffff?text=%E2%9C%93', iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-30]});
-  var unvisitedIcon = L.icon({iconUrl:'https://via.placeholder.com/30/ff0000/ffffff?text=%F0%9F%9A%9A', iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-30]});
+// Voeg markers toe
+uitjes.forEach(u => {
+  const el = document.createElement('div');
+  el.className = 'marker';
+  el.style.backgroundColor = u.visited ? '#00ff00' : '#ff0000';
+  if(!u.visited) el.classList.add('pulse'); // pulserende animatie
 
-  // Uitjes data met visuals
-  var uitjes = [
-    {name:"Efteling", lat:51.650, lng:5.040, badges:["🎢 Pretpark","🌳 Natuur"], visited:true, img:"https://via.placeholder.com/250x150?text=Efteling"},
-    {name:"Safaripark Beekse Bergen", lat:51.560, lng:5.098, badges:["🌿 Natuur","👨‍👩‍👧‍👦 Kinderen"], visited:false, img:"https://via.placeholder.com/250x150?text=Safaripark"},
-    {name:"Biesbosch", lat:51.750, lng:4.850, badges:["🌳 Natuur","🚣 Outdoor"], visited:true, img:"https://via.placeholder.com/250x150?text=Biesbosch"},
-    {name:"Stedelijk Museum Breda", lat:51.592, lng:4.775, badges:["🏛️ Cultuur","👨‍👩‍👧‍👦 Kinderen"], visited:false, img:"https://via.placeholder.com/250x150?text=Museum"},
-    {name:"Ouwehands Dierenpark", lat:51.984, lng:5.582, badges:["🦁 Dieren","👨‍👩‍👧‍👦 Kinderen"], visited:true, img:"https://via.placeholder.com/250x150?text=Dierenpark"}
-  ];
+  const popup = new mapboxgl.Popup({ offset:25 }).setHTML(
+    `<img src="${u.img}" class="popup-image">
+     <b>${u.name}</b><br/><div class="badges">${u.badges.join(" · ")}</div>`
+  );
 
-  // Voeg markers toe
-  uitjes.forEach(function(u){
-    var icon = u.visited ? visitedIcon : unvisitedIcon;
-    L.marker([u.lat,u.lng], {icon:icon})
-      .addTo(map)
-      .bindPopup(
-        "<img src='"+u.img+"' alt='"+u.name+"' class='popup-image'>" +
-        "<b>"+u.name+"</b><br/><div class='badges'>"+u.badges.join(" · ")+"</div>"
-      )
-      .on('click', function(){
-        u.visited = !u.visited;
-        this.setIcon(u.visited ? visitedIcon : unvisitedIcon);
-      });
+  const marker = new mapboxgl.Marker(el)
+    .setLngLat(u.coords)
+    .setPopup(popup)
+    .addTo(map);
+
+  el.addEventListener('click', () => {
+    u.visited = !u.visited;
+    el.style.backgroundColor = u.visited ? '#00ff00' : '#ff0000';
+    if(u.visited) el.classList.remove('pulse');
+    else el.classList.add('pulse');
   });
-
 });
 </script>
+
 </body>
 </html>
