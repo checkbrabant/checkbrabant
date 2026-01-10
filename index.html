@@ -1,87 +1,55 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <title>CheckBrabant – Ontdek de leukste uitjes</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      background: #f6f7f5;
-      color: #1f2933;
-    }
-    header {
-      background: linear-gradient(135deg, #2f855a, #68d391);
-      color: white;
-      padding: 2rem 1.5rem;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-    header p {
-      margin-top: .5rem;
-      opacity: .95;
-    }
-    main {
-      padding: 1.5rem;
-    }
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 1.25rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,.08);
-      max-width: 720px;
-      margin: 2rem auto;
-    }
-    .badge {
-      display: inline-block;
-      background: #e6fffa;
-      color: #065f46;
-      padding: .35rem .75rem;
-      border-radius: 999px;
-      font-size: .8rem;
-      margin-right: .5rem;
-    }
-    footer {
-      text-align: center;
-      padding: 2rem 1rem;
-      color: #6b7280;
-      font-size: .9rem;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CheckBrabant – Interactieve Kaart</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+ integrity="sha256-sA+o1jS4h2bJ9xQSP+Dy2s7w5xoDibpVf5Np8p+F+Gc=" crossorigin=""/>
+<style>
+  body { margin:0; font-family: system-ui, sans-serif; }
+  header { padding: 1.5rem; background: linear-gradient(135deg,#2f855a,#68d391); color: white; text-align:center;}
+  h1 { margin:0; font-size:2rem; }
+  #map { height: 80vh; width: 100%; }
+</style>
 </head>
 <body>
 
 <header>
   <h1>CheckBrabant</h1>
-  <p>Ontdek & vink af wat je hebt gedaan in Noord-Brabant</p>
+  <p>Interactieve testkaart met een paar uitjes</p>
 </header>
 
-<main>
-  <div class="card">
-    <span class="badge">🌳 Natuur</span>
-    <span class="badge">👨‍👩‍👧‍👦 Gezin</span>
-    <span class="badge">📍 Brabant</span>
+<div id="map"></div>
 
-    <h2>Welkom!</h2>
-    <p>
-      Dit is de eerste versie van <strong>CheckBrabant</strong>.
-      Hier komen straks:
-    </p>
-    <ul>
-      <li>🗺️ Een interactieve kaart</li>
-      <li>✅ Afvinkbare uitjes</li>
-      <li>🔐 Inloggen om je voortgang bij te houden</li>
-      <li>🏷️ Filters zoals natuur, kinderen, indoor/outdoor</li>
-    </ul>
-  </div>
-</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+ integrity="sha256-o9N1j7gF3cNQyT7Qk+f7aFZx5b6GIKCprh8m6cTIKM4=" crossorigin=""></script>
+<script>
+// Init kaart
+var map = L.map('map').setView([51.5, 5.2], 9); // Midden Noord-Brabant
 
-<footer>
-  © CheckBrabant.nl
-</footer>
+// Tile layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Testuitjes
+var uitjes = [
+  {name:"Efteling", lat:51.650, lng:5.040, badges:["🎢 Pretpark","🌳 Natuur"]},
+  {name:"Safaripark Beekse Bergen", lat:51.560, lng:5.098, badges:["🌿 Natuur","👨‍👩‍👧‍👦 Kinderen"]},
+  {name:"Biesbosch", lat:51.750, lng:4.850, badges:["🌳 Natuur","🚣 Outdoor"]},
+  {name:"Stedelijk Museum Breda", lat:51.592, lng:4.775, badges:["🏛️ Cultuur","👨‍👩‍👧‍👦 Kinderen"]},
+  {name:"Ouwehands Dierenpark", lat:51.984, lng:5.582, badges:["🦁 Dieren","👨‍👩‍👧‍👦 Kinderen"]}
+];
+
+// Voeg markers toe
+uitjes.forEach(function(u){
+  var popupContent = "<strong>"+u.name+"</strong><br/>" + u.badges.join(" · ");
+  L.marker([u.lat, u.lng]).addTo(map)
+    .bindPopup(popupContent)
+    .on('click', function(){ alert("Klik op "+u.name+" voor detailpagina"); });
+});
+</script>
 
 </body>
 </html>
