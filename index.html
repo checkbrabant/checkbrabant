@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheckBrabant – Digitale Speelse Kaart</title>
+<title>CheckBrabant – Speelse Kaart</title>
 
 <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
 <style>
@@ -61,6 +61,7 @@ p { margin:0; font-size:1rem; }
 
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script>
+// Init MapLibre
 const map = new maplibregl.Map({
     container: 'map',
     style: {version:8,sources:{},layers:[]},
@@ -68,17 +69,17 @@ const map = new maplibregl.Map({
     zoom: 9
 });
 
-// Voeg Stamen Watercolor tiles toe als speelse achtergrond
+// Voeg Carto Light tiles toe
 map.on('load', () => {
-  map.addSource('stamen-watercolor', {
+  map.addSource('carto-light', {
     type: 'raster',
-    tiles: ['https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg'],
+    tiles: ['https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'],
     tileSize: 256
   });
   map.addLayer({
-    id: 'base-map',
+    id: 'carto-light-layer',
     type: 'raster',
-    source: 'stamen-watercolor'
+    source: 'carto-light'
   });
 });
 
