@@ -65,9 +65,15 @@ p { margin:0; font-size:1rem; }
 const map = new maplibregl.Map({
     container: 'map',
     style: {version:8,sources:{},layers:[]},
-    center: [5.2, 51.5],
+    center: [5.2, 51.5], // Midden Brabant
     zoom: 9
 });
+
+// Focus alleen op Brabant
+map.setMaxBounds([
+  [4.7, 50.9], // Zuidwest
+  [6.0, 51.9]  // Noordoost
+]);
 
 // Voeg Carto Light tiles toe
 map.on('load', () => {
