@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheckBrabant – MapLibre Speelse Kaart</title>
+<title>CheckBrabant – Speelse MapLibre Kaart</title>
 
 <!-- MapLibre GL JS CSS -->
 <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
@@ -68,9 +68,29 @@ p { margin:0; font-size:1rem; }
 // Init MapLibre
 const map = new maplibregl.Map({
     container: 'map',
-    style: 'https://demotiles.maplibre.org/style.json', // gratis speelse stijl
+    style: {
+      "version": 8,
+      "sources": {},
+      "layers": []
+    },
     center: [5.2, 51.5],
     zoom: 9
+});
+
+// Voeg OSM raster tiles toe als achtergrond
+map.on('load', () => {
+  map.addSource('osm-tiles', {
+    type: 'raster',
+    tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+    tileSize: 256
+  });
+  map.addLayer({
+    id: 'osm-tiles-layer',
+    type: 'raster',
+    source: 'osm-tiles',
+    minzoom: 0,
+    maxzoom: 19
+  });
 });
 
 // Uitjes data
