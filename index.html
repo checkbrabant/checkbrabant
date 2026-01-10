@@ -3,25 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheckBrabant Test Kaart</title>
+<title>CheckBrabant – Speelse Kaart</title>
+
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 <style>
-  html, body {height:100%; margin:0;}
-  #map {height:100%;}
+  html, body { height:100%; margin:0; font-family: system-ui, sans-serif; }
+
+  /* Header */
+  header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg,#2f855a,#68d391);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  header img { height:40px; }
+  h1 { margin:0; font-size:2rem; }
+  p { margin:0; font-size:1rem; }
+
+  /* Kaart */
+  #map { height: calc(100vh - 80px); width:100%; border-top-left-radius:12px; border-top-right-radius:12px; overflow:hidden; }
+
+  /* Popup styling */
+  .leaflet-popup-content-wrapper {
+    border-radius:12px;
+    background:#fffbe6;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+  }
+  .leaflet-popup-content b { color:#2f855a; }
 </style>
 </head>
 <body>
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-var map = L.map('map').setView([51.5,5.2],9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution:'&copy; OpenStreetMap contributors'
-}).addTo(map);
 
-L.marker([51.650,5.040]).addTo(map).bindPopup("Efteling");
-L.marker([51.560,5.098]).addTo(map).bindPopup("Safaripark Beekse Bergen");
-L.marker([51.750,4.850]).addTo(map).bindPopup("Biesbosch");
+<header>
+  <img src="https://via.placeholder.com/40x40?text=CB" alt="CheckBrabant Logo">
+  <div>
+    <h1>CheckBrabant</h1>
+    <p>Interactieve speelse kaart – vink uitjes die je hebt bezocht</p>
+  </div>
+</header>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  // Init map
+  var map = L.map('map').setView([51.5,5.2],9);
+
+  // Speelse Watercolor tiles
+  L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg', {
+    attribution:'Map tiles by Stamen Design, CC BY 3.0 — © OpenStreetMap contributors',
+    subdomains:'abcd',
+    minZoom:1,
+    maxZoom:16
+  }).addTo(map);
+
+  // Marker icons (gebruik lokale afbeeldingen voor production)
+  var visitedIcon = L.icon({iconUrl:'https://via.placeholder.com/30/00ff00/ffffff?text=%E2%9C%93', iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-30]});
+  var unvisitedIcon = L.icon({iconUrl:'https://via.placeholder.com/30/ff0000/ffffff?text=%F0%9F%9A%9A', iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-30]});
+
+  // Test uitjes
+  var uitjes = [
+    {name:"Efteling", lat:51.650, lng:5.040, badges:["🎢 Pretpark","🌳 Natuur"], visited:true},
+    {name:"Safaripark Beekse Bergen", lat:51.560, lng:5.098, badges:["🌿 Natuur","👨‍👩‍👧‍👦 Kinderen"], visited:false},
+    {name:"Biesbosch", lat:51.750, lng:4.850, badges:["🌳 Natuur","🚣 Outdoor"], visited:true},
+    {name:"Stedelijk Museum Breda", lat:51.592, lng:4.775, badges:["🏛️ Cultuur","👨‍👩‍👧‍👦 Kinderen"], visited:false},
+    {name:"Ouwehands Dierenpark", lat:51.984, lng:5.582, badges:["🦁 Dieren","👨‍👩‍👧‍👦 Kinderen"], visited:true},
+    {name:"Nationaal Park De Loonse en Drunense Duinen", lat:51.650, lng:5.000, badges:["🌳 Natuur","🚶‍♂️ Outdoor"], visited:false},
+    {name:"Ecodrome Tilburg", lat:51.556, lng:5.090, badges:["🦉 Educatief","👨‍👩‍👧‍👦 Kinderen"], visited:true},
+    {name:"Van Abbemuseum Eindhoven", lat:51.440, lng:5.480, badges:["🏛️ Cultuur"], visited:false},
+    {name:"De Efteling Bosrijk", lat:51.651, lng:5.041, badges:["🎢 Pretpark","🌳 Natuur"], visited:true},
+    {name:"Speelland Beekse Bergen", lat:51.562, lng:5.097, badges:["👨‍👩‍👧‍👦 Kinderen","🎠 Speelpark"], visited:false}
+  ];
+
+  // Voeg markers toe
+  uitjes.forEach(function(u){
+    var icon = u.visited ? visitedIcon : unvisitedIcon;
+    L.marker([u.lat,u.lng], {icon:icon})
+      .addTo(map)
+      .bindPopup("<b>"+u.name+"</b><br/>" + u.badges.join(" · "))
+      .on('click', function(){
+        // Toggle bezoek-status
+        u.visited = !u.visited;
+        this.setIcon(u.visited ? visitedIcon : unvisitedIcon);
+      });
+  });
+
+});
 </script>
 </body>
 </html>
